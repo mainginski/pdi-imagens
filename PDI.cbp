@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Projeto1" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="default">
+				<Option output="PDI" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+			</Target>
+		</Build>
+		<Compiler>
+			<Add directory="C:/OpenCV2.1/include/opencv" />
+		</Compiler>
+		<Linker>
+			<Add option="C:/OpenCV2.1/lib/cv210.lib" />
+			<Add option="C:/OpenCV2.1/lib/cvaux210.lib" />
+			<Add option="C:/OpenCV2.1/lib/cxcore210.lib" />
+			<Add option="C:/OpenCV2.1/lib/highgui210.lib" />
+			<Add directory="C:/OpenCV2.1/lib" />
+		</Linker>
+		<Unit filename="Sem Titulo2.cpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
