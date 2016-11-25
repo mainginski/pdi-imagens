@@ -55,6 +55,18 @@ int somaArray(int hist[][3][256], int canal, int quadrante){
     return aux;
 }
 
+void zeraHistograma(int hist[][3][256],int equalizado[][3][256]){
+
+        for(int k=0;k<4;k++){
+            for(int j=0;j<3;j++){
+               for(int i=0;i<255;i++){
+                    equalizado[k][j][i]=0;
+                    hist[k][j][i]=0;
+               }
+            }
+        }
+}
+
 void equalizaHistograma(int hist[][3][256],int escalas,int equalizado[][3][256]){
         float prj[4][3][256];
         float sk[4][3][256];
@@ -82,8 +94,8 @@ CvScalar v;
 main(){
 int img;
 
-for (img = 0; img < 10; img++) {
-        itoa(img, buf, 100);
+for (img = 0; img < 1000; img++) {
+        sprintf(buf, "%d", img);
         strcat(buf, ".jpg");
         getcwd(cwd, 1024);
         strcpy(cwd_imagens, cwd);
@@ -92,6 +104,7 @@ for (img = 0; img < 10; img++) {
         sprintf(path, cwd_imagens, img);
         dst = cvLoadImage(path, CV_LOAD_IMAGE_COLOR);
 //        cvZero(imagemHistogramaEqualizada);
+        zeraHistograma(hist, equalizado);
         for (int i = 0; i < dst->height; i++)
              for (int j = 0; j < dst->width; j++) {
                     v = cvGet2D(dst, i, j);
@@ -120,6 +133,7 @@ for (img = 0; img < 10; img++) {
 
         strcpy(cwd_arquivo, cwd);
         strcat(cwd_arquivo, "\\saidaNormalizada.txt");
+
         FILE *arquivo;
         if(img == 0){
             arquivo = fopen(cwd_arquivo, "w");
@@ -134,10 +148,11 @@ for (img = 0; img < 10; img++) {
                         for (int k = 0; k < 120; k++) {
                             fprintf(arquivo,"  %d  |", equalizado[i][j][k]);
                         } // k
+                        fprintf(arquivo, "\n");
                 } // j
-            fprintf(arquivo, "\n", path);
+            fprintf(arquivo, "\n\n");
         } // i
-        fprintf(arquivo, "\n", path);
+        fprintf(arquivo, "\n");
         fclose(arquivo);
 
      cvNamedWindow("Imagem");
