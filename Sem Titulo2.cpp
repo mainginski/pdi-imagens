@@ -67,7 +67,7 @@ void equalizaHistograma(int hist[][3][256],int escalas,int equalizado[][3][256])
                     prj[k][j][i]=(float) hist[k][j][i]/soma;
                     if(i>0) sk[k][j][i]=prj[k][j][i]+sk[k][j][i-1];
                     else sk[k][j][i]=prj[k][j][i];
-                    equalizado[k][j][i]=round((sk[k][j][i]*(float)g));
+                    equalizado[k][j][(int)round((sk[k][j][i]*(float)g))]+=hist[k][j][i];
                }
             }
         }
@@ -91,9 +91,7 @@ for (img = 0; img < 10; img++) {
         strcat(cwd_imagens, buf);
         sprintf(path, cwd_imagens, img);
         dst = cvLoadImage(path, CV_LOAD_IMAGE_COLOR);
-        IplImage* imagemGrayscale = cvCreateImage(cvGetSize(dst), dst->depth, 1);
-        IplImage* imagemHistogramaEqualizada = cvCloneImage(imagemGrayscale);
-        cvZero(imagemHistogramaEqualizada);
+//        cvZero(imagemHistogramaEqualizada);
         for (int i = 0; i < dst->height; i++)
              for (int j = 0; j < dst->width; j++) {
                     v = cvGet2D(dst, i, j);
@@ -117,24 +115,29 @@ for (img = 0; img < 10; img++) {
                    }
          } // for
 
-        equalizaHistograma(hist,128,equalizado);
+        equalizaHistograma(hist,120,equalizado);
         // Normalizar histograma
 
-        FILE *arquivo;
         strcpy(cwd_arquivo, cwd);
         strcat(cwd_arquivo, "\\saidaNormalizada.txt");
-        arquivo = fopen(cwd_arquivo, "w");
+        FILE *arquivo;
+        if(img == 0){
+            arquivo = fopen(cwd_arquivo, "w");
+        }else{
+            arquivo = fopen(cwd_arquivo, "a");
+        }
 
         if (arquivo == NULL) exit (-1);
+        fprintf(arquivo, "%s\n", path);
         for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < 3; j++) {
-                        for (int k = 0; k < 256; k++) {
-                            fprintf(arquivo, "%d   ,", equalizado[i][j][k]);
+                        for (int k = 0; k < 120; k++) {
+                            fprintf(arquivo,"  %d  |", equalizado[i][j][k]);
                         } // k
                 } // j
-                fprintf(arquivo, "%s\n", path);
+            fprintf(arquivo, "\n", path);
         } // i
-
+        fprintf(arquivo, "\n", path);
         fclose(arquivo);
 
      cvNamedWindow("Imagem");
