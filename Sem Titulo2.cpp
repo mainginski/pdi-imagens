@@ -47,6 +47,9 @@ IplImage * Histograma(IplImage* Image) {
 
     return imgHistogram;
 }*/
+IplImage *dst;
+char path[1000], buf[100], cwd[1024], cwd_arquivo[1024], cwd_imagens[1024];
+
 int somaArray(int hist[][3][256], int canal, int quadrante){
     int aux=0;
     for(int i=0;i<255;i++){
@@ -85,10 +88,35 @@ void equalizaHistograma(int hist[][3][256],int escalas,int equalizado[][3][256])
         }
 }
 
+IplImage* lbp(IplImage* src){
+    int i,j;
+    CvScalar center, code;
+    printf("%d %d \n", src->height, src->width);
+     IplImage* dist = cvCreateImage(cvGetSize(src), src->depth, 1);
+     IplImage* image_tar = cvCreateImage(cvGetSize(dist), dist->depth, 1);
+     cvCvtColor(src, dist, CV_RGB2GRAY);
+
+    for(int i=1; i < src->height-1; i++){
+		    for(int j=1; j < src->width-1; j++) {
+               center = cvGet2D(dist, i, j);
+		       code.val[0] = 0;
+		       if(center.val[0] <= cvGet2D(dist, i-1, j-1).val[0]) code.val[0] += 128;
+		       if(center.val[0] <= cvGet2D(dist, i-1, j).val[0])   code.val[0] += 64;
+		       if(center.val[0] <= cvGet2D(dist, i-1, j+1).val[0]) code.val[0] += 32;
+		       if(center.val[0] <= cvGet2D(dist, i, j+1).val[0])   code.val[0] += 16;
+		       if(center.val[0] <= cvGet2D(dist, i+1, j+1).val[0]) code.val[0] += 8;
+		       if(center.val[0] <= cvGet2D(dist, i+1, j).val[0])   code.val[0] += 4;
+		       if(center.val[0] <= cvGet2D(dist, i+1, j-1).val[0]) code.val[0] += 2;
+		       if(center.val[0] <= cvGet2D(dist, i, j-1).val[0])   code.val[0] += 1;
+			  cvSet2D(image_tar, i, j, code);
+
+		     }
+		}
+		return image_tar;
+}
+
 float perc[4][3][10];
 int hist[4][3][256],equalizado[4][3][256];
-char path[1000], buf[100], cwd[1024], cwd_arquivo[1024], cwd_imagens[1024];
-IplImage *dst;
 CvScalar v;
 
 main(){
@@ -103,6 +131,9 @@ for (img = 0; img < 1000; img++) {
         strcat(cwd_imagens, buf);
         sprintf(path, cwd_imagens, img);
         dst = cvLoadImage(path, CV_LOAD_IMAGE_COLOR);
+
+        cvNamedWindow("Imagem2");
+        cvShowImage("Imagem2", lbp(dst));
 //        cvZero(imagemHistogramaEqualizada);
         zeraHistograma(hist, equalizado);
         for (int i = 0; i < dst->height; i++)
@@ -134,6 +165,7 @@ for (img = 0; img < 1000; img++) {
         strcpy(cwd_arquivo, cwd);
         strcat(cwd_arquivo, "\\saidaNormalizada.txt");
 
+
         FILE *arquivo;
         if(img == 0){
             arquivo = fopen(cwd_arquivo, "w");
@@ -157,6 +189,7 @@ for (img = 0; img < 1000; img++) {
 
      cvNamedWindow("Imagem");
      cvShowImage("Imagem", dst);
+
 
     // Converte imagem original colorida para níveis de cinza
 	//cvCvtColor(dst, imagemGrayscale, CV_RGB2GRAY);
