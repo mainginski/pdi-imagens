@@ -5,7 +5,7 @@
 #include<stdlib.h>
 #include<iostream>
 #include<sstream>
-CvHistogram* histo;
+/*CvHistogram* histo;
 IplImage * Histograma(IplImage* Image) {
 
     IplImage* imgHistogram = 0;
@@ -46,10 +46,35 @@ IplImage * Histograma(IplImage* Image) {
     }
 
     return imgHistogram;
+}*/
+int somaArray(int hist[][3][256], int canal, int quadrante){
+    int aux=0;
+    for(int i=0;i<255;i++){
+        aux = aux+ hist[quadrante][canal][i];
+    }
+    return aux;
+}
+
+void equalizaHistograma(int hist[][3][256],int escalas,int equalizado[][3][256]){
+        float prj[4][3][256];
+        float sk[4][3][256];
+        int g = escalas-1;
+        int soma;
+        for(int k=0;k<4;k++){
+            for(int j=0;j<3;j++){
+                soma=somaArray(hist,j,k);
+               for(int i=0;i<255;i++){
+                    prj[k][j][i]=(float) hist[k][j][i]/soma;
+                    if(i>0) sk[k][j][i]=prj[k][j][i]+sk[k][j][i-1];
+                    else sk[k][j][i]=prj[k][j][i];
+                    equalizado[k][j][i]=round((sk[k][j][i]*(float)g));
+               }
+            }
+        }
 }
 
 float perc[4][3][10];
-int hist[4][3][256];
+int hist[4][3][256],equalizado[4][3][256];
 char path[1000], buf[100], cwd[1024], cwd_arquivo[1024], cwd_imagens[1024];
 IplImage *dst;
 CvScalar v;
@@ -92,6 +117,7 @@ for (img = 0; img < 10; img++) {
                    }
          } // for
 
+        equalizaHistograma(hist,128,equalizado);
         // Normalizar histograma
 
         FILE *arquivo;
@@ -103,7 +129,7 @@ for (img = 0; img < 10; img++) {
         for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < 3; j++) {
                         for (int k = 0; k < 256; k++) {
-                            fprintf(arquivo, "%d   ,", hist[i][j][k]);
+                            fprintf(arquivo, "%d   ,", equalizado[i][j][k]);
                         } // k
                 } // j
                 fprintf(arquivo, "%s\n", path);
@@ -115,20 +141,20 @@ for (img = 0; img < 10; img++) {
      cvShowImage("Imagem", dst);
 
     // Converte imagem original colorida para níveis de cinza
-	cvCvtColor(dst, imagemGrayscale, CV_RGB2GRAY);
+	//cvCvtColor(dst, imagemGrayscale, CV_RGB2GRAY);
 
-	 cvEqualizeHist(imagemGrayscale, imagemHistogramaEqualizada);
-	cvNamedWindow("Imagem Equalizada");
-	cvShowImage("Imagem Equalizada", imagemHistogramaEqualizada);
+//	 cvEqualizeHist(imagemGrayscale, imagemHistogramaEqualizada);
+	//cvNamedWindow("Imagem Equalizada");
+	//cvShowImage("Imagem Equalizada", imagemHistogramaEqualizada);
 
-	IplImage * Imh2 = Histograma(imagemHistogramaEqualizada);
+	//IplImage * Imh2 = Histograma(imagemHistogramaEqualizada);
    // Mostra Histograma
-    cvNamedWindow("Histograma");
-    cvShowImage("Histograma", Imh2);
+    //cvNamedWindow("Histograma");
+    //cvShowImage("Histograma", Imh2);
 	 cvWaitKey(10000);
 
-    cvReleaseImage(&imagemGrayscale);
-	cvReleaseImage(&imagemHistogramaEqualizada);
+  //  cvReleaseImage(&imagemGrayscale);
+//	cvReleaseImage(&imagemHistogramaEqualizada);
 	 }
 
 }
