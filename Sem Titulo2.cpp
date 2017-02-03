@@ -1,4 +1,3 @@
-
 #include<cv.h>
 #include<highgui.h>
 #include<stdio.h>
@@ -47,10 +46,10 @@ IplImage * Histograma(IplImage* src, int index) {
         float min_value, max_value;
 
         float* ranges[] = {range};
-        int scale = 10;
+        //int scale = 10;
         IplImage* hist_img =
             cvCreateImage( cvSize(255,300), 8, 3 );
-        CvHistogram* hist;
+        //CvHistogram* hist;
         int r, g, b;
 
         //cvCvtColor( src, hsv, CV_BGR2HSV );
@@ -90,7 +89,6 @@ IplImage * Histograma(IplImage* src, int index) {
 
     return hist_img;
 }
-/*
 int somaArray(int hist[][3][256], int canal, int quadrante){
     int aux=0;
     for(int i=0;i<255;i++){
@@ -128,7 +126,32 @@ void equalizaHistograma(int hist[][3][256],int escalas,int equalizado[][3][256])
             }
         }
 }
-*/
+
+IplImage* lbp(IplImage* src){
+    CvScalar center, code;
+    printf("%d %d \n", src->height, src->width);
+     IplImage* dist = cvCreateImage(cvGetSize(src), src->depth, 1);
+     IplImage* image_tar = cvCreateImage(cvGetSize(dist), dist->depth, 1);
+     cvCvtColor(src, dist, CV_RGB2GRAY);
+
+    for(int i=1; i < src->height-1; i++){
+		    for(int j=1; j < src->width-1; j++) {
+               center = cvGet2D(dist, i, j);
+		       code.val[0] = 0;
+		       if(center.val[0] <= cvGet2D(dist, i-1, j-1).val[0]) code.val[0] += 128;
+		       if(center.val[0] <= cvGet2D(dist, i-1, j).val[0])   code.val[0] += 64;
+		       if(center.val[0] <= cvGet2D(dist, i-1, j+1).val[0]) code.val[0] += 32;
+		       if(center.val[0] <= cvGet2D(dist, i, j+1).val[0])   code.val[0] += 16;
+		       if(center.val[0] <= cvGet2D(dist, i+1, j+1).val[0]) code.val[0] += 8;
+		       if(center.val[0] <= cvGet2D(dist, i+1, j).val[0])   code.val[0] += 4;
+		       if(center.val[0] <= cvGet2D(dist, i+1, j-1).val[0]) code.val[0] += 2;
+		       if(center.val[0] <= cvGet2D(dist, i, j-1).val[0])   code.val[0] += 1;
+			  cvSet2D(image_tar, i, j, code);
+
+		     }
+		}
+		return image_tar;
+}
 
 float perc[4][3][10];
 int hist[4][3][256],equalizado[4][3][256];
