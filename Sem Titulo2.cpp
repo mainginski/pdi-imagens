@@ -12,14 +12,24 @@ CvHistogram* histo[1000][3];
 double comparations[1000], _rank[10];
 int k[10];
 
+void jogaPraBaixo(int indice){
+    for(int i = 9; i>indice; i--){
+        k[i] = k[i-1];
+        _rank[i] = _rank[i-1];
+    }
+}
 void rankeamento(){
-
     k[0] = k[1] = k[2] = k[3] = k[4] = k[5] = k[6] = k[7] = k[8] = k[9] = -1;
-    for(int j = 0; j<10; j++){
-        for(int i = 0; i<1000; i++){
-            if(comparations[i]>=_rank[j] && i!=k[0] && i!=k[1] && i!=k[2] && i!=k[3] && i!=k[4] && i!=k[5] && i!=k[6] && i!=k[7] && i!=k[8] && i!=k[9]){
+    for(int i = 0; i<1000; i++){
+        for(int j = 0; j<10; j++){
+            if(i==k[0] || i==k[1] || i==k[2] || i==k[3] || i==k[4] || i==k[5] || i==k[6] || i==k[7] || i==k[8] || i==k[9]){
+                continue ;
+            }
+            if(comparations[i]>=_rank[j]){
+                    jogaPraBaixo(j);
                     k[j]=i;
                     _rank[j]=comparations[i];
+                    break;
 
             }
         }
@@ -222,7 +232,7 @@ for (img = 0; img < 1000; img++) {
     cvShowImage("Histograma", Imh2);
     comparations[img] = cvCompareHist(histo[img][0], histo[escolha][0],0) + cvCompareHist(histo[img][1], histo[escolha][1],0) + cvCompareHist(histo[img][2], histo[escolha][2],0);
     printf("Imagem %d: %f\n",img, comparations[img]);
-    //cvWaitKey(5);
+    //cvWaitKey(5000);
 
   //  cvReleaseImage(&imagemGrayscale);
 //	cvReleaseImage(&imagemHistogramaEqualizada);
