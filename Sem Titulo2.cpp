@@ -7,7 +7,7 @@
 #include<sstream>
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #define max(a, b) (((a) > (b)) ? (a) : (b))
-CvHistogram* histo[1000][3];
+CvHistogram* histo[1000][3], * histo_lbp[1000][3];
 double comparations[1000], _rank[10];
 int k[10];
 
@@ -29,7 +29,6 @@ void rankeamento(){
                     k[j]=i;
                     _rank[j]=comparations[i];
                     break;
-
             }
         }
     }
@@ -118,7 +117,7 @@ IplImage* lbp(IplImage* src){
 
 IplImage * Histograma_lbp(IplImage* src, int index) {
     IplImage* g_plane = lbp(src);
-        int hist_size[] = {256}, channels = {0};
+        int hist_size[] = {256};
         /* hue varies from 0 (~0 deg red) to 180 (~360 deg red again) */
         float min_value, max_value;
     // Set ranges for histogram bins
@@ -132,13 +131,12 @@ IplImage * Histograma_lbp(IplImage* src, int index) {
         //cvCvtColor( src, hsv, CV_BGR2HSV );
         //cvCvtColor( src, hsv, CV_HSV2BGR );
         cvZero( hist_img );
-        histo[index][0] = cvCreateHist( 1, hist_size, CV_HIST_ARRAY, ranges );
-        cvCalcHist( &g_plane, histo[index][0]);
-        cvGetMinMaxHistValue( histo[index][0], &min_value, &max_value);
-        printf("\n min max %f %f \n", min_value, max_value);
+        histo_lbp[index][0] = cvCreateHist( 1, hist_size, CV_HIST_ARRAY, ranges );
+        cvCalcHist( &g_plane, histo_lbp[index][0]);
+        cvGetMinMaxHistValue( histo_lbp[index][0], &min_value, &max_value);
         for( r = 0; r < 255; r++ )
         {
-            int value = cvQueryHistValue_1D( histo[index][0], r);
+            int value = cvQueryHistValue_1D( histo_lbp[index][0], r);
             int normalized = cvRound(value*50/max_value);
             cvLine(hist_img,cvPoint(r,50), cvPoint(r,50-normalized), CV_RGB(128,128,128));
         }
@@ -194,7 +192,7 @@ IplImage *dst, *imgS;
 CvScalar v;
 
 main(){
-    IplImage * Imh2, * imgSel;
+    IplImage * Imh2, * imgSel, * imgSel2;
 int escolha, modo;
 printf("Escolha um numero de imagem para comparar com as outras: \n> ");
 scanf("%d", &escolha);
@@ -216,6 +214,10 @@ switch(modo){
         break;
         case 2:
             imgSel = Histograma_lbp(imgS, escolha);
+        break;
+        case 3:
+            imgSel = Histograma(imgS, escolha);
+            imgSel2 = Histograma_lbp(imgS, escolha);
         break;
 }
 
@@ -281,7 +283,15 @@ for (img = 0; img < 1000; img++) {
             Imh2 = Histograma_lbp(dst, img);
            // Mostra Histograma
             cvShowImage("Histograma", Imh2);
-            comparations[img] = cvCompareHist(histo[img][0], histo[escolha][0],0);
+            comparations[img] = cvCompareHist(histo_lbp[img][0], histo_lbp[escolha][0],0);
+        break;
+        case 3:
+            Imh2 = Histograma(dst, img);
+            comparations[img] = (cvCompareHist(histo[img][0], histo[escolha][0],0) + cvCompareHist(histo[img][1], histo[escolha][1],0) + cvCompareHist(histo[img][2], histo[escolha][2],0))/3;
+
+            Imh2 = Histograma_lbp(dst, img);
+            comparations[img] += cvCompareHist(histo_lbp[img][0], histo_lbp[escolha][0],0);
+            comparations[img] /=2;
         break;
     }
     printf("Imagem %d: %f\n",img, comparations[img]);
